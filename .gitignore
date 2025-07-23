@@ -25,6 +25,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+watch-history.html
+watch-history-short.html
+検索履歴.html
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
