@@ -2,17 +2,17 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
 n_input = input("読み取る動画数は？（空で全件）: ")
-N = int(n_input) if n_input.strip() else None  # Noneなら全件
+N = int(n_input) if n_input.strip() else None 
 D = 0.7 #視聴時間
-path = 'test/watch-history-short.html'
-#path = 'test/watch-history.html'
+path = 'watch-history.html'
+#path = 'watch-history.html'
 
 with open(path, encoding='utf-8') as f:
     soup = BeautifulSoup(f, 'lxml')
 
 entries = soup.find_all("div", class_="content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1")
 
-watch_data = []  # ここを [(タイトル, datetime), ...] のリストにする
+watch_data = [] 
 
 for i, entry in enumerate(entries):
     a_tags = entry.find_all("a")
@@ -64,18 +64,32 @@ if last == 1:
 
 
 print("end!")
-
+from collections import defaultdict
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
-intervals = []
+# 月ごとの視聴時間を格納
+monthly_duration = defaultdict(timedelta)
+
 for i in range(len(watch_data) - 1):
-    delta = abs((watch_data[i+1][1] - watch_data[i][1]).total_seconds()) / 3600  
-    intervals.append(delta)
+    curwatch = watch_data[i][1]
+    nextwatch = watch_data[i + 1][1]
+    delta = curwatch - nextwatch
+    if timedelta(0) < delta <= timedelta(hours=D):
+        month = curwatch.strftime("%Y-%m")  # 例: "2025-07"
+        monthly_duration[month] += delta
 
-plt.figure(figsize=(10,6))
-plt.hist(intervals, bins=50, color='skyblue', edgecolor='black')
-plt.title("視聴開始間隔の分布 (時間単位)")
-plt.xlabel("視聴開始間隔（時間）")
-plt.ylabel("頻度（回数）")
-plt.grid(True)
+# 月ごとのデータをソート
+months = sorted(monthly_duration.keys())
+durations = [monthly_duration[month].total_seconds() / 3600 for month in months]  # 時間に変換
+
+# グラフ描画
+plt.figure(figsize=(10, 6))
+plt.bar(months, durations, color='mediumseagreen', edgecolor='black')
+plt.xticks(rotation=45)
+plt.xlabel("Year-Month")
+plt.ylabel("WatchTime (h)")
+plt.title("WatchTime Per Month")
+plt.tight_layout()
+plt.grid(axis='y')
 plt.show()
