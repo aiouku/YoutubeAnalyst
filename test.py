@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 n_input = input("読み取る動画数は？（空で全件）: ")
 N = int(n_input) if n_input.strip() else None 
 D = 0.7 #視聴時間
-path = 'watch-history.html'
+path = 'watch-history-short.html'
 #path = 'watch-history.html'
 
 with open(path, encoding='utf-8') as f:
@@ -35,7 +35,9 @@ for i, entry in enumerate(entries):
     except ValueError:
         continue
 
-    watch_data.append([title, dt1])
+    #watch_data.append([title, dt1])
+    watch_data.append([title, dt1, a_tags[0]['href'] if a_tags else None])
+
 
     if N is not None and i == N:
         break
@@ -54,14 +56,20 @@ if len(watch_data) >= 2:
 else:
     print("視聴日時が十分にありません。")
 
-print(f"総再生時間 (動画数:{N} ): {total_duration}")
-
+print(f"総視聴時間 (動画数:{N} ): {total_duration}")
+'''
 last = int(input("視聴履歴を表示する？(0: No , 1: Yes)"))
 if last == 1:
     print("\n--- 視聴履歴一覧 ---")
     for title, dt in watch_data:
         print(f"{dt} - {title}")
-
+'''
+show_links = int(input("動画リンクを表示しますか？(0: No , 1: Yes): "))
+if show_links == 1:
+    print("\n--- YouTubeリンク一覧 ---")
+    count = int(input("表示する件数を入力（空なら全件）: ") or len(watch_data))
+    for i, (title, dt, url) in enumerate(watch_data[:count]):
+        print(f"{i+1}. {title} ({dt})\n   {url if url else 'URLなし'}")
 
 print("end!")
 from collections import defaultdict
